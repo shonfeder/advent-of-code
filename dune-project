@@ -1,4 +1,4 @@
-(lang dune 1.11)
+(lang dune 2.0)
 (generate_opam_files true)
 
 (name aoc_2019)
@@ -20,5 +20,6 @@
   ;; inc to v13 once opium can support
   (core (>= v0.13.0))
 
-  (ppx_deriving (>= 4.4))
+  (ppx_inline_test (>= v0.13.0))
+  (ppx_deriving (and :with-test (>= 4.4)))
 ))
