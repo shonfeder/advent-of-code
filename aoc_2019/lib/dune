@@ -1,6 +1,6 @@
 (library
  (name aoc_2019)
  (inline_tests)
- (libraries core fpath)
+ (libraries core fpath angstrom)
  (preprocess
-  (pps ppx_deriving.std ppx_inline_test)))
+  (pps ppx_deriving.std ppx_inline_test ppx_sexp_conv)))

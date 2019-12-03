@@ -4,7 +4,7 @@ default:
 
 .PHONY: deps
 deps:
-	-dune build
+	-dune build @install
 	git add dune-project aoc_2019.opam
 	git commit -m "Updating deps"
 	opam install . --deps-only
