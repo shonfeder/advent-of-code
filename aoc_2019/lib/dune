@@ -1,0 +1,6 @@
+(library
+ (name aoc_2019)
+ (inline_tests)
+ (libraries core fpath)
+ (preprocess
+  (pps ppx_deriving.std ppx_inline_test)))
