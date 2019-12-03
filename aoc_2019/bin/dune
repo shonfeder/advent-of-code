@@ -1,0 +1,6 @@
+(executable
+ (public_name aoc_2019)
+ (name main)
+ (libraries aoc_2019 core)
+ (preprocess
+  (pps ppx_deriving.std)))
