@@ -10,6 +10,7 @@ depends: [
   "dune" {>= "2.0.0"}
   "ocaml" {>= "4.08.0"}
   "core" {>= "v0.13.0"}
+  "fpath" {>= "0.7.2"}
   "ppx_inline_test" {with-test & >= "v0.13.0"}
   "ppx_deriving" {>= "4.4"}
 ]
