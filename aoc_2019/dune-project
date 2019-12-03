@@ -5,9 +5,8 @@
 (version 0.1.0)
 
 (authors "Shon Feder")
-; (source (github shonfeder/shonfeder_net))
 (maintainers "shon.feder@gmail.com")
-; (homepage "https://github.com/shonfeder/shonfeder_net")
+(homepage "https://github.com/shonfeder/advent-of-code")
 
 (package
  (name aoc_2019)
@@ -17,7 +16,6 @@
   (dune (>= 2.0.0))
 
   (ocaml (>= 4.08.0))
-  ;; inc to v13 once opium can support
   (core (>= v0.13.0))
 
   (ppx_inline_test (and :with-test (>= v0.13.0)))
