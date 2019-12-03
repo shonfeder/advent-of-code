@@ -5,6 +5,7 @@ synopsis: "TODO"
 description: "TODO"
 maintainer: ["shon.feder@gmail.com"]
 authors: ["Shon Feder"]
+homepage: "https://github.com/shonfeder/advent-of-code"
 depends: [
   "dune" {>= "2.0.0"}
   "ocaml" {>= "4.08.0"}
