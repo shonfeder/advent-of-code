@@ -5,13 +5,10 @@ module Comp = Comp ()
 
 let%test "ex 1" =
   (Program.of_string "1,0,0,0,99" |> Comp.run) = 2
-
 let%test "ex 2" =
   (Program.of_string "2,3,0,3,99" |> Comp.run ~res_loc:3)  = 6
-
 let%test "ex 3" =
   (Program.of_string "2,4,4,5,99,0" |> Comp.run ~res_loc:5) = 9801
-
 let%test "ex 4" =
   (Program.of_string "1,1,1,4,99,5,6,0,99" |> Comp.run) = 30
 

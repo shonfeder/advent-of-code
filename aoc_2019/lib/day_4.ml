@@ -24,15 +24,9 @@ module Puzzle_1 = struct
   let meets_criteria n =
     int_to_digits n |> satisfies_invarients
 
-
-  let%test "ex 1 satisfies invarients" =
-    int_to_digits 111111 |> satisfies_invarients
-
-  let%test "ex 2 doesn't satisfy invarients" =
-    not (int_to_digits 223450 |> satisfies_invarients)
-
-  let%test "ex 3 doesn't satisfy invarients" =
-    not (int_to_digits 123789 |> satisfies_invarients)
+  let%test "ex 1 satisfies invarients"       = meets_criteria 111111
+  let%test "ex 2 doesn't satisfy invarients" = not (meets_criteria 223450)
+  let%test "ex 3 doesn't satisfy invarients" = not (meets_criteria 123789)
 
   let solution () =
     let candidates = List.range ~start:`inclusive ~stop:`inclusive low high in
@@ -53,8 +47,7 @@ module Puzzle_2 = struct
   let satisfies_invarients pw =
     let rec check_digits digits =
       match digits with
-      | (x :: x' :: xs) ->
-        x <= x' && check_digits (x'::xs)
+      | (x :: x' :: xs) -> x <= x' && check_digits (x'::xs)
       | _ -> List.mem (count_runs pw) 2 ~equal:Int.equal
     in
     check_digits pw
