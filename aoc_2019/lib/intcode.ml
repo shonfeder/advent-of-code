@@ -332,7 +332,7 @@ module Comp () = struct
       ; effect: Effect.t
       }
 
-    let v_state ?output ~state ~inputs effect = { state; inputs; output; effect}
+    let v_state ?output ~state ~inputs effect = {state; inputs; output; effect}
 
     type v_result =
       { outputs: int list
