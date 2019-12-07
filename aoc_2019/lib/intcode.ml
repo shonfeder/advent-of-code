@@ -39,38 +39,45 @@ end = struct
   let length = Array.length
 end
 
+module Mode = struct
+  exception Invalid_mode
+
+  type t =
+    | Position
+    | Immediate
+  [@@deriving enum, show { with_path = false }, eq]
+
+  let of_int i = match of_enum i with
+    | Some m -> m
+    | None -> raise Invalid_mode
+end
+
+module State = struct
+  type t = Continue | Halt
+  [@@deriving eq, show]
+end
+
+module Effect = struct
+  type t =
+    | Stop
+    | Resume
+    | Advance
+    | Input of (Mode.t * int) (* destination address *)
+    | Output of int
+  [@@deriving eq, show { with_path = false }]
+end
+
+type v_result =
+  { outputs: int list
+  ; result: int
+  ; effects: Effect.t list
+  }
+[@@deriving show]
+
 module Comp () = struct
   type memory = int array ref
   type address = int
   type raw_instruction = int array
-
-  module Mode = struct
-    exception Invalid_mode
-
-    type t =
-      | Position
-      | Immediate
-    [@@deriving enum, show { with_path = false }, eq]
-
-    let of_int i = match of_enum i with
-      | Some m -> m
-      | None -> raise Invalid_mode
-  end
-
-  module State = struct
-    type t = Continue | Halt
-    [@@deriving eq, show]
-  end
-
-  module Effect = struct
-    type t =
-      | Stop
-      | Resume
-      | Advance
-      | Input of (Mode.t * int) (* destination address *)
-      | Output of int
-    [@@deriving eq, show { with_path = false }]
-  end
 
   let memory : memory = ref [||]
 
@@ -334,13 +341,6 @@ module Comp () = struct
 
     let v_state ?output ~state ~inputs effect = {state; inputs; output; effect}
 
-    type v_result =
-      { outputs: int list
-      ; result: int
-      ; effects: Effect.t list
-      }
-    [@@deriving show]
-
     exception Expected_input
 
     let tick : int list -> v_state = fun inputs ->
@@ -386,7 +386,7 @@ let%test "modal params" =
 let%test "basic io" =
   let module Comp = Comp () in
   let open Comp in
-  let Virtual.{outputs; effects; _} = Program.of_string "3,0,4,0,99" |> Virtual.run ~inputs:[5]
+  let {outputs; effects; _} = Program.of_string "3,0,4,0,99" |> Virtual.run ~inputs:[5]
   in
   let expected_effects = Effect.[Input (Position, 0); Output 5; Stop]
   in
@@ -398,56 +398,56 @@ let%test "equal to" =
   let module Comp = Comp () in
   let open Comp in
   let program = Program.of_string "3,9,8,9,10,9,4,9,99,-1,8" in
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[8] in
+  let {outputs; _} = Virtual.run program ~inputs:[8] in
   List.equal Int.equal outputs [1] &&
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[1] in
+  let {outputs; _} = Virtual.run program ~inputs:[1] in
   List.equal Int.equal outputs [0]
 
 let%test "less than " =
   let module Comp = Comp () in
   let open Comp in
   let program = Program.of_string "3,9,7,9,10,9,4,9,99,-1,8" in
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[9] in
+  let {outputs; _} = Virtual.run program ~inputs:[9] in
   List.equal Int.equal outputs [0] &&
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[1] in
+  let {outputs; _} = Virtual.run program ~inputs:[1] in
   List.equal Int.equal outputs [1]
 
 let%test "equal to in immediate mode" =
   let module Comp = Comp () in
   let open Comp in
   let program = Program.of_string "3,3,1108,-1,8,3,4,3,99" in
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[8] in
+  let {outputs; _} = Virtual.run program ~inputs:[8] in
   List.equal Int.equal outputs [1] &&
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[7] in
+  let {outputs; _} = Virtual.run program ~inputs:[7] in
   List.equal Int.equal outputs [0]
 
 let%test "less than in immediate mode" =
   let module Comp = Comp () in
   let open Comp in
   let program = Program.of_string "3,3,1107,-1,8,3,4,3,99" in
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[8] in
+  let {outputs; _} = Virtual.run program ~inputs:[8] in
   List.equal Int.equal outputs [0] &&
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[7] in
+  let {outputs; _} = Virtual.run program ~inputs:[7] in
   List.equal Int.equal outputs [1]
 
 let%test "jump using position mode" =
   let module Comp = Comp () in
   let open Comp in
   let program = Program.of_string "3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9" in
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[8] in
+  let {outputs; _} = Virtual.run program ~inputs:[8] in
   List.equal Int.equal outputs [1]
   &&
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[0] in
+  let {outputs; _} = Virtual.run program ~inputs:[0] in
   List.equal Int.equal outputs [0]
 
 let%test "jump using immediate mode" =
   let module Comp = Comp () in
   let open Comp in
   let program = Program.of_string "3,3,1105,-1,9,1101,0,0,12,4,12,99,1" in
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[8] in
+  let {outputs; _} = Virtual.run program ~inputs:[8] in
   List.equal Int.equal outputs [1]
   &&
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[0] in
+  let {outputs; _} = Virtual.run program ~inputs:[0] in
   List.equal Int.equal outputs [0]
 
 let%test "relation of input to 8" =
@@ -455,11 +455,11 @@ let%test "relation of input to 8" =
   let open Comp in
   let program = Program.of_string
       "3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99" in
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[0] in
+  let {outputs; _} = Virtual.run program ~inputs:[0] in
   List.equal Int.equal outputs [999]
   &&
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[8] in
+  let {outputs; _} = Virtual.run program ~inputs:[8] in
   List.equal Int.equal outputs [1000]
   &&
-  let Virtual.{outputs; _} = Virtual.run program ~inputs:[10] in
+  let {outputs; _} = Virtual.run program ~inputs:[10] in
   List.equal Int.equal outputs [1001]
